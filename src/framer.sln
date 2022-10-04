@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "framer", "framer\framer.csproj", "{9B043E49-E58D-4856-8EFB-7D5424EF9ACD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "framer", "framer.csproj", "{9B043E49-E58D-4856-8EFB-7D5424EF9ACD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
