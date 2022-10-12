@@ -10,6 +10,8 @@ namespace framer
     public class Converters
     {
 
+
+
         public static string ConvertRectangles(string x, string y, string width, string height)
         {
             var x1 = float.Parse(x);
@@ -84,8 +86,17 @@ namespace framer
 
     }
 
+    public static class Interpolation
+    {
+        public const string Linear = "0 0 1 1";
+        public const string EaseIn = "0.5 0 1 1";
+        public const string EaseOut = "0 0 0.5 1";
+        public const string EaseInEaseOut = "0.5 0 0.5 1";
+    }
+
     public class FPath
     {
+
         public static XElement AnimateAttribute(string attributeName, string begin, double frameduration, string[] values) => XElement.Parse($@"
 <svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" xml:space=""preserve"" >
 <animate 
@@ -95,7 +106,7 @@ namespace framer
     values=""{string.Join(";", values)}"" 
     repeatCount=""indefinite"" 
     calcMode=""spline""
-    keySplines=""{string.Join(";", Enumerable.Repeat(".5 0 .5 1", values.Length - 1))}""
+    keySplines=""{string.Join(";", Enumerable.Repeat(Interpolation.Linear, values.Length - 1))}""
     fill=""freeze""/>
 </svg>").Descendants().First(x => x.Name.LocalName == "animate");
 
@@ -129,7 +140,7 @@ namespace framer
       type=""{type}""
       values=""{string.Join(";", values)}"" />
       calcMode=""spline""
-      keySplines=""{string.Join(";", Enumerable.Repeat(".5 0 .5 1", values.Length - 1))}""
+      keySplines=""{string.Join(";", Enumerable.Repeat(Interpolation.Linear, values.Length - 1))}""
 </svg>").Descendants().First(x => x.Name.LocalName == "animateTransform");
 
         const string format = "0.#################";

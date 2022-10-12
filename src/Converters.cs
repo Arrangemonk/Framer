@@ -1,6 +1,7 @@
 ﻿using framer;
 using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -13,10 +14,14 @@ namespace Framer
         const string groupName = "g";
         private static XNamespace nameSpace = null;
 
-
+        public static string PadNumbers(string input)
+        {
+            return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(10, '0'));
+        }
 
         static void Main(string[] args)
         {
+            System.Diagnostics.Debugger.Launch();
             CultureInfo ci = new CultureInfo("en-US");
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
@@ -25,7 +30,7 @@ namespace Framer
             XDocument first = null;
             var framepaths = new Dictionary<string, List<string>>();
             //var transforms = new Dictionary<string, List<Transform>>();
-            foreach (var path in args)
+            foreach (var path in args.OrderBy(path => PadNumbers(Path.GetFileNameWithoutExtension(path))))
             {
                 var svg = XDocument.Load(path);
                 if (first == null)
@@ -94,7 +99,7 @@ namespace Framer
 
                 foreach (var transform in Transform.possibleTransforms(transforms))
                 {
-                    descendants[i].Add(Transform.animateTransform(transform.Type, attribute.Name.LocalName, "0s", 3, transform.Values, transform.Additive));
+                    descendants[i].Add(Transform.animateTransform(transform.Type, attribute.Name.LocalName, "0s", 0.12, transform.Values, transform.Additive));
                 }
                 //attribute.Remove();
             }
@@ -127,7 +132,7 @@ namespace Framer
             if(loop)
                 anims.Add(anims[0]);// hin und her
 
-            path.Add(FPath.AnimateAttribute("d", "0s", 3, anims.ToArray()));
+            path.Add(FPath.AnimateAttribute("d", "0s", 0.12, anims.ToArray()));
         }
 
 
