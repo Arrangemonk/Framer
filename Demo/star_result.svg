@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<svg width="100%" height="100%" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+	<path id="star" d="M100,16C114.142,35.135 122.104,54.437 118.859,74.043C141.493,84.476 161.485,82.876 179.889,74.043C167.855,92.194 151.947,104.921 130.515,109.915C131.003,133.479 138.546,151.913 149.374,167.957C129.426,160.927 111.958,150.396 100,132.085C75.264,136.266 59.855,149.209 50.626,167.957C51.231,146.987 55.718,127.125 69.485,109.915C56.352,92.496 39.823,80.654 20.111,74.043C40.454,68.984 60.798,68.293 81.141,74.043C97.531,59.099 101.938,38.932 100,16Z" style="fill:url(#_Linear1);stroke:#000;stroke-width:2px;">
+		<animate attributeName="d" begin="0s" dur="10s" values="M100,16C114.142,35.135 122.104,54.437 118.859,74.043C141.493,84.476 161.485,82.876 179.889,74.043C167.855,92.194 151.947,104.921 130.515,109.915C131.003,133.479 138.546,151.913 149.374,167.957C129.426,160.927 111.958,150.396 100,132.085C75.264,136.266 59.855,149.209 50.626,167.957C51.231,146.987 55.718,127.125 69.485,109.915C56.352,92.496 39.823,80.654 20.111,74.043C40.454,68.984 60.798,68.293 81.141,74.043C97.531,59.099 101.938,38.932 100,16Z;M180.717,74.372C166.923,93.76 151.05,107.325 131.407,110.332C128.523,135.086 136.254,153.592 150.369,168.341C129.377,162.542 112.337,151.376 100.932,132.556C78.685,140.342 63.507,153.238 51.621,168.516C52.106,147.371 56.688,127.495 70.378,110.44C58.718,88.228 41.628,77.602 20.94,74.655C41.061,68.715 61.334,66.809 81.969,74.547C94.446,56.651 100.566,37.262 100.726,16.471C111.854,34.236 118.832,53.357 119.688,74.48C138.984,85.416 159.522,83.339 180.717,74.372Z" repeatCount="indefinite" calcMode="spline" keySplines=".5 0 .5 1" fill="freeze"/>
+	</path>
+	<defs>
+		<linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="translate(16,100) scale(168,168)">
+					<stop offset="0" style="stop-color:#f00;stop-opacity:1"/>
+			<stop offset="1" style="stop-color:#0500ff;stop-opacity:1"/>
+			<animateTransform attributeName="gradientTransform" attributeType="XML" begin="0s" dur="10s" calcMode="spline" keySplines=".5 0 .5 1" repeatCount="indefinite" type="translate" values="16,100;74.7756,20.6284"/>
+			<animateTransform attributeName="gradientTransform" attributeType="XML" begin="0s" dur="10s" calcMode="spline" keySplines=".5 0 .5 1" repeatCount="indefinite" additive="sum" type="rotate" values="0;71.8983801833531"/>
+			<animateTransform attributeName="gradientTransform" attributeType="XML" begin="0s" dur="10s" calcMode="spline" keySplines=".5 0 .5 1" repeatCount="indefinite" additive="sum" type="scale" values="168,168;167.999824013628,167.999824013628"/>
+		</linearGradient>
+	</defs>
+</svg>
