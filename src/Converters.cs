@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
+using framer.Common;
+using framer.VectAlign;
 
 namespace Framer
 {
@@ -21,7 +23,7 @@ namespace Framer
 
         static void Main(string[] args)
         {
-            System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Launch();
             CultureInfo ci = new CultureInfo("en-US");
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
@@ -29,7 +31,8 @@ namespace Framer
             Console.WriteLine("svg animator");
             XDocument first = null;
             var framepaths = new Dictionary<string, List<string>>();
-            //var transforms = new Dictionary<string, List<Transform>>();
+            var Transforms = new Dictionary<string, List<Transform>>();
+            var ViewBoxes = new List<List<float>>();
             foreach (var path in args.OrderBy(path => PadNumbers(Path.GetFileNameWithoutExtension(path))))
             {
                 var svg = XDocument.Load(path);
@@ -38,33 +41,70 @@ namespace Framer
                     first = svg;
                     nameSpace = first.Root.GetDefaultNamespace();
                 }
-                //convertTransforms(ref transforms, svg.Root);
-                extractPaths(ref framepaths, svg.Root);
+                ConvertTransforms(ref Transforms, svg.Root);
+                ExtractPaths(ref framepaths, svg.Root);
+                ExtractViewBoxe(ref ViewBoxes, svg.Root);
                 //HandleElements(svg.Root, groupName, (group, id) =>
                 //{
-                //    extractPaths(ref framepaths, group, id);
+                //    ExtractPaths(ref framepaths, group, id);
                 //});
 
             }
-            HandleElements(first.Root, pathName, (path, id) => animatePath(path, ref framepaths, id));
+
+            HandleViewBoxes(first.Root, ViewBoxes);
+
+            HandleElements(first.Root, pathName, (path, id) => AnimatePath(path, ref framepaths, id,true));
 
             //HandleElements(first.Root, groupName, (group, id) =>
             //{
-            //    foreach (var path in animpaths(group, id))
+            //    foreach (var path in AnimPaths(group, id))
             //    {
-            //        animatePath(path, ref framepaths,id);
+            //        AnimatePath(path, ref framepaths,id);
             //    }
             //});
-            //animateTransforms(ref transforms, first.Root);
-            first.Save(args[0].Substring(0, args[0].Length - 3) + "output.svg");
+            AnimateTransforms(ref Transforms, first.Root);
+            first.Save(args[0].Substring(0, args[0].Count() - 3) + "output.svg");
         }
 
-        private static void convertTransforms(ref Dictionary<string, List<Transform>> transforms, XElement parent)
+        private static void ExtractViewBoxe(ref List<List<float>> ViewBoxes, XElement svgRoot)
+        {
+            var viewbox = svgRoot.Attribute("viewBox")?.Value;
+            if (viewbox != null)
+            {
+                var parts = viewbox.Split(' ');
+
+                ViewBoxes.Add(parts.Select(part => float.Parse(part)).ToList());
+            }
+        }
+
+        private static void HandleViewBoxes(XElement firstRoot, List<List<float>> ViewBoxes)
+        {
+            var result = new List<float>{0,0,0,0};
+
+            foreach (var current in ViewBoxes)
+            {
+                for (var i = 0; i < current.Count; i++)
+                {
+                    // start points of viewboxes can be smaller than 0
+                    if(current[i] < 0 ? current[i] < result[i] : result[i] < current[i])
+                        result[i] = current[i];
+                }
+            }
+
+            var resultstring = string.Join(" ", result);
+            var viewbox = firstRoot.Attribute("viewBox");
+            if (viewbox == null)
+                firstRoot.Add(new XAttribute("viewBox", resultstring));
+            else
+                viewbox.Value = resultstring;
+        }
+
+        private static void ConvertTransforms(ref Dictionary<string, List<Transform>> Transforms, XElement parent)
         {
             var descendants = parent.Descendants().Where(elem => TransformAttributeFromElement(elem) != null).ToArray();
-            for (int i = 0; i < descendants.Length; i++)
+            for (int i = 0; i < descendants.Count(); i++)
             {
-                var id = descendants[i].Attribute(idName)?.Value;// ?? i.ToString();
+                var id = descendants[i].Attribute(idName)?.Value;// ?? i.[i]();
                 if (id == null)
                     continue;
                 var attribute = TransformAttributeFromElement(descendants[i]);
@@ -72,34 +112,34 @@ namespace Framer
                     continue;
 
                 var decomposed = new Transform(attribute.Value.Replace("matrix(", "").Replace(")", "").Split(",").Select(part => double.Parse(part)).ToArray());
-                //attribute.Value = decomposed.ToString();
-                if (!transforms.ContainsKey(id))
-                    transforms.Add(id, new List<Transform>());
-                transforms[id].Add(decomposed);
+                //attribute.Value = decomposed.[i]();
+                if (!Transforms.ContainsKey(id))
+                    Transforms.Add(id, new List<Transform>());
+                Transforms[id].Add(decomposed);
             }
         }
 
-        private static void animateTransforms(ref Dictionary<string, List<Transform>> transformDict, XElement parent)
+        private static void AnimateTransforms(ref Dictionary<string, List<Transform>> TransformDict, XElement parent)
         {
             var descendants = parent.Descendants().Where(elem => TransformAttributeFromElement(elem) != null).ToArray();
-            for (int i = 0; i < descendants.Length; i++)
+            for (int i = 0; i < descendants.Count(); i++)
             {
-                var id = descendants[i].Attribute(idName)?.Value;// ?? i.ToString();
+                var id = descendants[i].Attribute(idName)?.Value;// ?? i.[i]();
                 if (id == null)
                     continue;
                 var attribute = TransformAttributeFromElement(descendants[i]);
                 if (attribute == null)
                     continue;
 
-                if (!transformDict.ContainsKey(id))
+                if (!TransformDict.ContainsKey(id))
                 {
                     continue;
                 }
-                var transforms = transformDict[id];
+                var Transforms = TransformDict[id];
 
-                foreach (var transform in Transform.possibleTransforms(transforms))
+                foreach (var t in Transform.PossibleTransforms(Transforms))
                 {
-                    descendants[i].Add(Transform.animateTransform(transform.Type, attribute.Name.LocalName, "0s", 0.12, transform.Values, transform.Additive));
+                    descendants[i].Add(Transform.AnimateTransform(t.Type, attribute.Name.LocalName, "0s", 1, t.Values, t.Additive));
                 }
                 //attribute.Remove();
             }
@@ -115,33 +155,36 @@ namespace Framer
         {
 
             var descendants = parent.Descendants(nameSpace + elementName).ToArray();
-            for (int i = 0; i < descendants.Length; i++)
+            for (int i = 0; i < descendants.Count(); i++)
             {
-                var id = descendants[i].Attribute(idName)?.Value;// ?? i.ToString();
+                var id = descendants[i].Attribute(idName)?.Value;// ?? i.[i]();
                 if (id == null)
                     continue;
                 action(descendants[i], id);
             }
         }
 
-        private static void animatePath(XElement path, ref Dictionary<string, List<string>> framepaths, string index,bool loop = false)
+        private static void AnimatePath(XElement path, ref Dictionary<string, List<string>> framepaths, string index, bool loop = false)
         {
             var anims = framepaths[index];
             if (anims == null || anims.Count < 2 || anims.All(anim => anim.Equals(anims[0])))
                 return;
-            if(loop)
+            if (loop)
                 anims.Add(anims[0]);// hin und her
 
-            path.Add(FPath.AnimateAttribute("d", "0s", 0.12, anims.ToArray()));
+            var aligned = VectAlign.AlignSequence(anims.ToList(),AlignMode.SubLinear);
+            path.Attribute("d").Value = aligned[0];
+
+            path.Add(FPath.AnimatePath( path.Attribute(idName).Value, 1, aligned));
         }
 
 
-        private static void extractPaths(ref Dictionary<string, List<string>> framepaths, XElement parent)
+        private static void ExtractPaths(ref Dictionary<string, List<string>> framepaths, XElement parent)
         {
             var descendants = parent.Descendants(nameSpace + pathName).ToArray();
-            for (int i = 0; i < descendants.Length; i++)
+            for (int i = 0; i < descendants.Count(); i++)
             {
-                var id = descendants[i].Attribute(idName)?.Value;// ?? i.ToString();
+                var id = descendants[i].Attribute(idName)?.Value;// ?? i.[i]();
                 if (id == null)
                     continue;
                 if (!framepaths.ContainsKey(id))
@@ -151,11 +194,11 @@ namespace Framer
             }
         }
 
-        private static void extractPaths(ref Dictionary<string, List<string>> framepaths, XElement parent, string parentID)
+        private static void ExtractPaths(ref Dictionary<string, List<string>> framepaths, XElement parent, string parentID)
         {
             var descendants = parent.Descendants(nameSpace + pathName).ToArray();
 
-            for (int i = 0; i < descendants.Length; i++)
+            for (int i = 0; i < descendants.Count(); i++)
             {
                 var id = descendants[i].Attribute(idName)?.Value ?? parentID + i;
 
@@ -167,7 +210,7 @@ namespace Framer
             }
         }
 
-        private static IEnumerable<XElement> animpaths(XElement svg, string parentID)
+        private static IEnumerable<XElement> AnimPaths(XElement svg, string parentID)
         {
             var result = new List<XElement>();
             int index = 0;

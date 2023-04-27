@@ -1,0 +1,26 @@
+{
+"Fps": 30,
+"Frames": [
+{
+"Filename": "frame1.png",
+"FrameNumber": 1,
+"Duration": 0.5,
+"Interpolation": "EaseIn"
+},
+{
+"Filename": "frame2.png",
+"FrameNumber": 2,
+"Duration": 0.5,
+"Interpolation": "EaseOut"
+},
+{
+"Filename": "frame3.png",
+"FrameNumber": 3,
+"Duration": 0.5,
+"Interpolation": "EaseInEaseOut"
+}
+],
+"DefaultInterpolation": "EaseInEaseOut",
+"OutputFileName": "animation",
+"OutputFormat": "All"
+}

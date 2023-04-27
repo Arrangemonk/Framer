@@ -65,14 +65,14 @@ namespace framer
         //            return '';
         //        }
 
-        //        var output = 'M' + (cx - rx).toString() + ',' + cy.toString();
-        //        output += 'a' + rx.toString() + ',' + ry.toString() + ' 0 1,0 ' + (2 * rx).toString() + ',0';
-        //        output += 'a' + rx.toString() + ',' + ry.toString() + ' 0 1,0' + (-2 * rx).toString() + ',0';
+        //        var output = 'M' + (cx - rx).[i]() + ',' + cy.[i]();
+        //        output += 'a' + rx.[i]() + ',' + ry.[i]() + ' 0 1,0 ' + (2 * rx).[i]() + ',0';
+        //        output += 'a' + rx.[i]() + ',' + ry.[i]() + ' 0 1,0' + (-2 * rx).[i]() + ',0';
 
         //        return output;
         //    }
 
-        //    switch (arguments.length)
+        //    switch (arguments.Count())
         //    {
         //        case 3:
         //            return calcOuput(parseFloat(cx, 10), parseFloat(cy, 10), parseFloat(arguments[2], 10), parseFloat(arguments[2], 10));
@@ -86,41 +86,48 @@ namespace framer
 
     }
 
-    public static class Interpolation
-    {
-        public const string Linear = "0 0 1 1";
-        public const string EaseIn = "0.5 0 1 1";
-        public const string EaseOut = "0 0 0.5 1";
-        public const string EaseInEaseOut = "0.5 0 0.5 1";
-    }
 
     public class FPath
     {
 
-        public static XElement AnimateAttribute(string attributeName, string begin, double frameduration, string[] values) => XElement.Parse($@"
+        public static IEnumerable<XElement> AnimatePath(string Animid,double frameduration, List<string> values)
+        {
+            var begin = $"0s;{Animid}Anim{values.Count/2 - 1}.end";
+
+            for (var i = 0; i < values.Count; i+=2)
+            {
+                var id = $"{Animid}Anim{i/2}";
+                yield return AnimateAttribute("d", id, begin, frameduration, values[i], values[i+1]);
+                begin = $"{id}.end";
+            }
+
+        }
+
+        public static XElement AnimateAttribute(string attributeName,string id, string begin, double frameduration, string from, string to) => XElement.Parse($@"
 <svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" xml:space=""preserve"" >
 <animate 
+    id=""{id}"" 
     attributeName=""{attributeName}"" 
     begin=""{begin}"" 
-    dur=""{frameduration * values.Length}s"" 
-    values=""{string.Join(";", values)}"" 
-    repeatCount=""indefinite"" 
+    dur=""{frameduration}s"" 
     calcMode=""spline""
-    keySplines=""{string.Join(";", Enumerable.Repeat(Interpolation.Linear, values.Length - 1))}""
-    fill=""freeze""/>
+    keySplines=""{InterpolationValues.WeirdOut}""
+    fill=""freeze""
+    from=""{from}""
+    to=""{to}""/>
 </svg>").Descendants().First(x => x.Name.LocalName == "animate");
 
     }
     public class TransformAnim
     {
 
-        public TransformAnim(string type, string[] values, bool additive)
+        public TransformAnim(string type, string[] values, bool Additive)
         {
             Type = type;
             Values = values;
-            Additive = additive;
+            Additive = Additive;
 
-         }
+        }
 
         public bool Additive { get; set; }
         public string Type { get; set; }
@@ -128,19 +135,19 @@ namespace framer
     }
     public class Transform
     {
-        public static XElement animateTransform(string type, string attributename, string begin, double frameduration, string[] values, bool additive) => XElement.Parse($@"
+        public static XElement AnimateTransform(string type, string attributename, string begin, double frameduration, string[] values, bool Additive) => XElement.Parse($@"
 <svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" xml:space=""preserve"" >
     <animateTransform
       attributeName =""{attributename}""
       attributeType=""XML""
       begin=""{begin}""
-      dur=""{frameduration * values.Length}s"" 
+      dur=""{frameduration * values.Count()}s"" 
       repeatCount=""indefinite""
-      {(additive ? "additive=\"sum\"" : "")}
+      {(Additive ? "Additive=\"sum\"" : "")}
       type=""{type}""
       values=""{string.Join(";", values)}"" />
       calcMode=""spline""
-      keySplines=""{string.Join(";", Enumerable.Repeat(Interpolation.Linear, values.Length - 1))}""
+      keySplines=""{string.Join(";", Enumerable.Repeat(InterpolationValues.Linear, values.Count() - 1))}""
 </svg>").Descendants().First(x => x.Name.LocalName == "animateTransform");
 
         const string format = "0.#################";
@@ -168,7 +175,7 @@ namespace framer
         public const string ScaleName = "scale";
         public string Scale => $"{ScaleX.ToString(format)},{ ScaleY.ToString(format)}";
 
-        //https://stackoverflow.com/questions/5107134/find-the-rotation-and-skew-of-a-matrix-transformation
+        //https://stackoverflow.com/questions/5107134/find-the-rotation-and-skew-of-a-matrix-Transformation
         // var a = [a, b, c, d, e, f]
         public Transform(params double[] a)
         {
@@ -216,7 +223,7 @@ namespace framer
             return string.Join(" ", result);
         }
 
-        public static IEnumerable<TransformAnim> possibleTransforms(IEnumerable<Transform> transforms)
+        public static IEnumerable<TransformAnim> PossibleTransforms(IEnumerable<Transform> transforms)
         {
             var translatelist = new List<string>();
             var rotatelist = new List<string>();
