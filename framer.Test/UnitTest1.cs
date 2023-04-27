@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using framer.VectAlign;
 
 namespace framer.Test
 {
@@ -12,21 +13,13 @@ namespace framer.Test
         [Fact]
         public void TestMorphTests()
         {
-            StringBuilder CommandListSource = new StringBuilder();
-            StringBuilder CommandListTarget = new StringBuilder();
-            foreach (Match match in commandregex.Matches(source))
-            {
-                CommandListSource.Append(match.Value.Substring(0, 1));
-            }
-            foreach (Match match in commandregex.Matches(target))
-            {
-                CommandListTarget.Append(match.Value.Substring(0, 1));
-            }
 
-            var sourcestring = CommandListSource.ToString();
-            var targetstring = CommandListTarget.ToString();
 
-            var morph = new PathMorph<char>(sourcestring.ToArray(), targetstring.ToArray());
+            var morphs = VectAlign.VectAlign.AlignSequence(new List<string> { source, target }, AlignMode.SubLinear);
+            var morphcommands = morphs.Select(morph => string.Join("", commandregex.Matches(morph).Select(m => m.Value.Substring(0, 1)))).ToList();
+
+
+            Assert.True(morphcommands.All(m => m.Equals(morphcommands[0])));
 
         }
     }
